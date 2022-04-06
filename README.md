@@ -1,6 +1,6 @@
 For running the project:
 
-1- Create a copy of .env.example and update the variables if needed.
+1- create a copy of .env.example with name .env. Then update the .env variables if needed.
 
 2- ```docker-compose up -d --build```
 
