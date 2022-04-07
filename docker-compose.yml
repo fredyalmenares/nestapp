@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  app:
+  nestapp:
     container_name: main
     build:
       context: .
@@ -9,8 +9,43 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
     command: npm run start:dev
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nestapp.rule=PathPrefix(`${API_PREFIX}`)"
+      - "traefik.http.routers.nestapp.entrypoints=web"
+      - "traefik.http.routers.nestapp.service=nestapp"
+      - "traefik.http.services.nestapp.loadbalancer.server.port=${SERVER_PORT}"
     env_file:
       - .env
+  traefik:
+    image: "traefik:v2.6.1"
+    container_name: "traefik"
+    restart: always
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      - "traefik.enable=true"
+
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dozzle.rule=PathPrefix(`/aphl/dashboard`)"
+      - "traefik.http.routers.dozzle.entrypoints=web"
+      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOZZLE_BASE=/aphl/dashboard

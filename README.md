@@ -4,4 +4,4 @@ For running the project:
 
 2- ```docker-compose up -d --build```
 
-3- The server swagger will be under http://localhost:{PORT}/docs/swagger
+3- The server swagger will be under http://localhost/{API_PREFIX}/docs/swagger/
